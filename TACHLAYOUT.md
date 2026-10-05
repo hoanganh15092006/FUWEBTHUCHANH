@@ -1,9 +1,19 @@
-<div class="center_content" id="displayCauThu">
-   <div class="center_title_bar">Latest Products</div>
-   @RenderBody();
- </div>
+# Hướng dẫn kết nối DB
 
-o
+## Bước 1: Lấy connection string
+
+```
+Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=QLGiaiBongDa;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Command Timeout=30
+```
+
+## Bước 2: Điền connection string vào ""
+
+```
+Scaffold-DbContext "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=QLGiaiBongDa;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Command Timeout=30" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models
+```
+
+vào manage package console và chạy lệnh đó
+
 
 # HƯỚNG DẪN TÁCH HEADER VÀ FOOTER THÀNH PARTIAL VIEW TRONG ASP.NET CORE MVC
 
@@ -59,22 +69,6 @@ Giữ lại @{ViewData}
 Cách gọi khác bằng Tag Helper: Bạn cũng có thể dùng cú pháp 
 <partial name="_Header" /> và <partial name="_Footer" />.
 ```
-
-# Hướng dẫn kết nối DB
-
-## Bước 1: Lấy connection string
-
-```
-Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=QLGiaiBongDa;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Command Timeout=30
-```
-
-## Bước 2: Điền connection string vào ""
-
-```
-Scaffold-DbContext "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=QLGiaiBongDa;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;Command Timeout=30" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models
-```
-
-vào manage package console và chạy lệnh đó
 
 # Tạo components (hiển thị ... cho phần )
 
@@ -408,7 +402,7 @@ thêm
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 ```
 
-## Bước 2 trong default 
+## Bước 2 trong default
 
 ```
 @using De04.Models
@@ -473,7 +467,6 @@ thêm
 ```
                        $('#displayCauThu').html(str);
 ```
-
 
 dùng đoạn đó để id vào class ví dụ:
 
