@@ -14,7 +14,6 @@ Scaffold-DbContext "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=QLGiaiBon
 
 vào manage package console và chạy lệnh đó
 
-
 # HƯỚNG DẪN TÁCH HEADER VÀ FOOTER THÀNH PARTIAL VIEW TRONG ASP.NET CORE MVC
 
 Hướng dẫn này giúp bạn cắt phần **Header** và **Footer** từ file Layout chung (`_Layout.cshtml`), đưa vào các file Partial View riêng biệt trong thư mục `Views/Shared` để mã nguồn gọn gàng và dễ bảo trì.
@@ -475,4 +474,229 @@ dùng đoạn đó để id vào class ví dụ:
    <div class="center_title_bar">Latest Products</div>
    @RenderBody();
  </div>
+```
+
+
+
+
+# Xoa,them,sua
+
+## Xóa SP
+
+trong homecontroller
+
+```
+[HttpGet]
+
+public IActionResult XoaCauThu(string idcauthu)
+{
+    var CauThu = _context.Cauthus.FirstOrDefault(x => x.CauThuId == idcauthu);
+
+    bool daThamGiatrandau = _context.TrandauCauthus.Any(x => x.CauThuId == idcauthu);
+
+        if (daThamGiatrandau)
+    {
+        TempData["XoaThatBai"] = "Khong the xoa vi da tham gia tran dau";
+    }
+    else
+    {
+        _context.Cauthus.Remove(CauThu);
+        _context.SaveChanges();
+        TempData["XoaThanhCong"] = "Xóa cầu thủ thành công!";
+
+    }
+    return RedirectToAction("Index");
+}
+```
+
+trong index
+
+```
+@if (TempData["XoaThatBai"] != null)
+{
+    <script>
+        alert('@Html.Raw(TempData["XoaThatBai"])');
+    </script>
+}
+
+
+@if (TempData["XoaThanhCong"] != null)
+{
+    <script>
+        alert('@Html.Raw(TempData["XoaThanhCong"])');
+    </script>
+}
+```
+
+button trong index
+
+```
+<button> <a asp-action="XoaCauThu" asp-route-idcauthu="@item.CauThuId">Xoa</a></button>
+```
+
+## Sửa
+
+Tải 2 package này trong developer powershell
+
+```
+dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design
+dotnet tool install -g dotnet-aspnet-codegenerator
+```
+
+
+cd vào đúng thư mục dự án
+
+dùng lệnh này trong developer powershell
+
+```
+dotnet aspnet-codegenerator view SuaCauThu Edit -m Cauthu -dc QlgiaiBongDaContext -outDir Views/Home
+```
+
+
+| Phần                       | Ý nghĩa                                                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `dotnet`                  | Chạy công cụ .NET CLI                                                                                                |
+| `aspnet-codegenerator`    | Công cụ**Scaffolding**của ASP.NET Core, giúp tự sinh code                                                    |
+| `view`                    | Yêu cầu tạo**View**                                                                                            |
+| `SuaCauThu`               | Tên View muốn tạo → thường sẽ tạo`SuaCauThu.cshtml` và phải giống tên phương thức trong homecontroller |
+| `Edit`                    | Chọn**template Edit**→ View dùng để sửa dữ liệu                                                           |
+| `-m Cauthus`              | `-m`= **Model** . View sẽ sử dụng model`Cauthus`                                                           |
+| `-dc QlgiaiBongDaContext` | `-dc`= **Data Context** . Sử dụng`QlgiaiBongDaContext`để kết nối database                               |
+| `-outDir Views/Home`      | Nơi lưu View được tạo                                                                                             |
+
+trong homecontroller
+
+```
+[HttpGet]
+public IActionResult SuaCauThu(string idcauthu) 
+{
+    var cauThu = _context.Cauthus.FirstOrDefault(x => x.CauThuId == idcauthu);
+    ViewBag.CauLacBoId = new SelectList(_context.Caulacbos, "CauLacBoId", "TenClb"); 
+
+
+    return View(cauThu);
+}
+
+[HttpPost]
+
+public IActionResult SuaCauThu(Cauthu idcauthu)
+{
+    if (ModelState.IsValid)
+    {
+        _context.Cauthus.Update(idcauthu);
+        _context.SaveChanges();
+
+        return RedirectToAction("Index");
+    }
+    return View(idcauthu);
+}
+```
+
+selectlist theo viewbag trong
+
+```
+<select asp-for="CauLacBoId" class ="form-control" asp-items="ViewBag.CauLacBoId"></select>
+```
+
+## Thêm
+
+cd vào đúng thư mục dự án
+
+dùng lệnh này trong developer powershell
+
+```
+dotnet aspnet-codegenerator view ThemCauThu Create -m Cauthu -dc QlgiaiBongDaContext -outDir Views/Home
+```
+
+trong homecontroller 
+
+```
+[HttpGet]
+public IActionResult ThemMoi()
+{
+  
+    ViewBag.CauLacBoId = new SelectList(_context.Caulacbos, "CauLacBoId", "TenClb");
+    return View();
+}
+
+[HttpPost]
+public IActionResult ThemMoi(Cauthu cauthu)
+{
+    if (ModelState.IsValid)
+    {
+        _context.Cauthus.Add(cauthu);
+        _context.SaveChanges();
+
+        return RedirectToAction("Index");
+    }
+
+  
+    ViewBag.CauLacBoId = new SelectList(_context.Caulacbos, "CauLacBoId", "TenClb", cauthu.CauLacBoId);
+    return View(cauthu);
+}
+```
+
+
+
+selectlist theo viewbag trong
+
+```
+<select asp-for="CauLacBoId" class ="form-control" asp-items="ViewBag.CauLacBoId"></select>
+```
+
+# Các kiểu validate
+
+### chỉ đc nhập chữ cái
+
+```
+[RegularExpression(@"^[a-zA-ZàáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệđìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵÀÁẢÃẠÂẦẤẨẪẬĂẰẮẲẴẶÈÉẺẼẸÊỀẾỂỄỆĐÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴ\s]+$", ErrorMessage = "Quốc tịch chỉ được nhập chữ cái!")]
+```
+
+### ảnh phải có đuôi
+
+```
+[RegularExpression(@"^.+\.(jpg|png|jpeg)$", ErrorMessage = "Tên file ảnh phải có đuôi .jpg, .png hoặc .jpeg!")]
+```
+
+### không để trống
+
+```
+[Required(ErrorMessage = "Họ tên không được để trống")]
+```
+
+### Giới hạn độ dài
+
+```
+[StringLength(50, MinimumLength = 3,
+    ErrorMessage = "Họ tên phải từ 3 đến 50 ký tự")]
+```
+
+### Chỉ cho số nguyên
+
+```
+[Range(1, 100, ErrorMessage = "Tuổi phải từ 1 đến 100")]
+```
+
+### Số tiền / điểm trong khoảng
+
+```
+[Range(0, 100000000,
+    ErrorMessage = "Giá phải từ 0 đến 100 triệu")]
+```
+
+### Email
+
+```
+[RegularExpression(
+    @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+    ErrorMessage = "Email không hợp lệ"
+)]
+```
+
+### Chỉ nhập chữ cái
+
+```
+[RegularExpression(@"^[a-zA-ZÀ-ỹ\s]+$",
+    ErrorMessage = "Chỉ được nhập chữ cái")]
+public string HoTen { get; set; }
 ```
